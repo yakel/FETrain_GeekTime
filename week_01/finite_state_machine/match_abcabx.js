@@ -1,59 +1,59 @@
 function match(str) {
-  let state = start;
+  let state = start
   for (const char of str) {
-    state = state(char);
+    state = state(char)
 
     if (state === end) {
-      return true;
+      return true
     }
   }
-  return state === end;
+  return state === end
 }
 
 function start(char) {
-  if (char === "a") {
-    return foundA;
+  if (char === 'a') {
+    return foundA
   }
-  return start;
+  return start
 }
 
 function end(char) {
-  return end;
+  return end
 }
 
 function foundA(char) {
-  if (char === "b") {
-    return foundB;
+  if (char === 'b') {
+    return foundB
   }
-  return start(char);
+  return start(char)
 }
 
 function foundB(char) {
-  if (char === "c") {
-    return foundC;
+  if (char === 'c') {
+    return foundC
   }
-  return start(char);
+  return start(char)
 }
 
 function foundC(char) {
-  if (char === "a") {
-    return foundA2;
+  if (char === 'a') {
+    return foundA2
   }
-  return start(char);
+  return start(char)
 }
 
 function foundA2(char) {
-  if (char === "b") {
-    return foundB2;
+  if (char === 'b') {
+    return foundB2
   }
-  return start(char);
+  return start(char)
 }
 
 function foundB2(char) {
-  if (char === "x") {
-    return end;
+  if (char === 'x') {
+    return end
   }
-  return findB(char);
+  return findB(char)
 }
 
-console.log(match("abcabcabx"));
+console.log(match('abcabcabx'))

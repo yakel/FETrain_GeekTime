@@ -1,10 +1,10 @@
 function match(str) {
   for (const char of str) {
-    if (char === "a") {
-      return true;
+    if (char === 'a') {
+      return true
     }
   }
-  return false;
+  return false
 }
 
-match("I am robot");
+match('I am robot')

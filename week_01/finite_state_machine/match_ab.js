@@ -1,15 +1,15 @@
 function match(str) {
-  let foundA = false;
+  let foundA = false
   for (const char of str) {
-    if (char === "a") {
-      foundA = true;
-    } else if (foundA && char === "b") {
-      return true;
+    if (char === 'a') {
+      foundA = true
+    } else if (foundA && char === 'b') {
+      return true
     } else {
-      foundA = false;
+      foundA = false
     }
   }
-  return false;
+  return false
 }
 
-match("I am robot");
+match('I am robot')
