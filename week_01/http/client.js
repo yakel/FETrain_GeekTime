@@ -209,7 +209,7 @@ async function testRequest() {
   const request = new Request({
     method: 'POST',
     host: 'localhost',
-    port: 8088,
+    port: 8080,
     path: '/',
     headers: {
       ['X-Foo2']: 'customed',
