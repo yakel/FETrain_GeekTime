@@ -52,6 +52,7 @@ function specificity(selector) {
 
 function compare(sp1, sp2) {
   let diff
+  // 循环遍历进行比较
   for (let i = 0; i < 4; i += 1) {
     diff = sp1[i] - sp2[i]
     if (diff) {
@@ -89,6 +90,7 @@ function computeCSS(element) {
           computedStyle[property] = {}
         }
         const sp = computedStyle[property].specificity
+        // 第一次设置 或 规则比当前值大 时，更新规则及特征值
         if (!sp || compare(ruleSp, sp) > 0) {
           computedStyle[property].value = declaration.value
           computedStyle[property].specificity = ruleSp
@@ -106,6 +108,7 @@ function emit(token) {
     const element = {
       type: 'element',
       tagName: token.tagName,
+      // TODO: 为什么实例用数组，感觉用object更方便访问，有什么特殊的原因？
       attributes: {},
       children: [],
     }
