@@ -1,3 +1,5 @@
+const css = require('css')
+
 const EOF = Symbol('EOF') // End of file
 
 let currentToken = null
@@ -5,6 +7,97 @@ let currentAttribute = null
 
 let stack = [{ type: 'document', children: [] }]
 let currentTextNode = null
+
+let rules = []
+function addCSSRule(text) {
+  const ast = css.parse(text)
+  // console.log(JSON.stringify(ast, null, '    '))
+  rules.push(...ast.stylesheet.rules)
+}
+
+function match(element, selector) {
+  if (!selector || !element.attributes) {
+    return false
+  }
+  const start = selector.charAt(0)
+  if (start === '#') {
+    const idSelector = selector.slice(1)
+    return element.attributes.id === idSelector
+  } else if (start === '.') {
+    const classSelector = selector.slice(1)
+    return element.attributes.class === classSelector
+  } else {
+    if (element.tagName === selector) {
+      return true
+    }
+  }
+  return false
+}
+
+function specificity(selector) {
+  const p = [0, 0, 0, 0]
+  const parts = selector.split(' ')
+  for (const part of parts) {
+    const start = part.charAt(0)
+    if (start === '#') {
+      p[1] += 1
+    } else if (start === '.') {
+      p[2] += 1
+    } else {
+      p[3] += 1
+    }
+  }
+  return p
+}
+
+function compare(sp1, sp2) {
+  let diff
+  for (let i = 0; i < 4; i += 1) {
+    diff = sp1[i] - sp2[i]
+    if (diff) {
+      return diff
+    }
+  }
+  return diff
+}
+
+function computeCSS(element) {
+  if (!element.computedStyle) {
+    element.computedStyle = {}
+  }
+
+  const ancestors = stack.slice().reverse()
+  for (rule of rules) {
+    const selectorParts = rule.selectors[0].split(' ').reverse()
+    if (!match(element, selectorParts[0])) {
+      continue
+    }
+
+    let selectorIndex = 1
+    for (const ancestor of ancestors) {
+      if (match(ancestor, selectorParts[selectorIndex])) {
+        selectorIndex += 1
+      }
+    }
+    const matched = selectorIndex >= selectorParts.length
+    if (matched) {
+      computedStyle = element.computedStyle
+      const ruleSp = specificity(rule.selectors[0])
+      for (const declaration of rule.declarations) {
+        const property = declaration.property
+        if (!computedStyle[property]) {
+          computedStyle[property] = {}
+        }
+        const sp = computedStyle[property].specificity
+        if (!sp || compare(ruleSp, sp) > 0) {
+          computedStyle[property].value = declaration.value
+          computedStyle[property].specificity = ruleSp
+        }
+      }
+      console.log('computed style:', computedStyle)
+    }
+  }
+}
 
 function emit(token) {
   top = stack[stack.length - 1]
@@ -21,6 +114,9 @@ function emit(token) {
         element.attributes[key] = value
       }
     }
+
+    computeCSS(element)
+
     top.children.push(element)
     element.parent = top
 
@@ -32,6 +128,9 @@ function emit(token) {
     if (top.tagName !== token.tagName) {
       throw new Error('Tag start end not match!')
     } else {
+      if (top.tagName === 'style') {
+        addCSSRule(top.children[0].content)
+      }
       stack.pop()
     }
     currentTextNode = null
