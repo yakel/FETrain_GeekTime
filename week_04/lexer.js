@@ -28,16 +28,19 @@ class XRegExp {
 
   exec(str) {
     const res = this.regExp.exec(str)
-    console.log(res)
+    let type
     for (let i = 1; i < res.length; i += 1) {
+      // 一个token可能会匹配多个，匹配最内层最具体的那个（数字更大）
+      // 比如 for，既是Token也是Keyword，匹配Keyword
       if (res[i] !== undefined) {
-        console.log(res[i], this.table.get(i))
-        res[this.table.get(i)] = res[i]
+        type = this.table.get(i)
       }
     }
+    if (type) {
+      console.log(JSON.stringify(res[0]).padEnd(20), type)
+      res[type] = true
+    }
     return res
-
-    console.log('r:', res)
   }
 
   get lastIndex() {
@@ -68,13 +71,9 @@ function scan(str) {
     Punctuator: /\(|\)|\[|\]|\{|\}|=>|==|=|<|\+|\+\+|\.|;|\?|:|\*|,/,
   }
   const regExp = new XRegExp(lexical, 'g', 'InputElement')
-  // let res = ''
   while (regExp.lastIndex < str.length) {
-    const r = regExp.exec(str)
-    // res += r[0]
-    break
+    regExp.exec(str)
   }
-  // console.log(res)
 }
 
 scan(`for (let i = 0; i < 3; i++) {
