@@ -1,44 +1,51 @@
 class XRegExp {
-  constructor(source, flags, root) {
-    this.table = new Map()
-    const regExpStr = this.compile(source, root, 1)
+  constructor(lexicalStruct, flags, root) {
+    const regExpStr = this.compile(lexicalStruct, root)
     this.regExp = new RegExp(regExpStr.source, flags)
     console.log('re:', this.regExp)
-    console.log('table:', this.table)
   }
 
-  compile(source, name, start) {
-    const expr = source[name]
+  // 递归扩展正则表达式，并用命名分组添加类型信息
+  compile(lexicalStruct, name) {
+    const expr = lexicalStruct[name]
     if (expr instanceof RegExp) {
-      return { source: expr.source, length: 0 }
+      return { source: expr.source, isTerminal: true }
     }
-    let offset = 0
-    const regExpStr = expr.replace(/<(\w+)>/g, (s, $1) => {
-      this.table.set(start + offset, $1)
-      offset += 1
-      const result = this.compile(source, $1, start + offset)
-      offset += result.length
-      return '(' + result.source + ')'
+
+    // 一个token可能会匹配多个，匹配最内层最具体的那个
+    // 比如: for既是Token也是Keyword，需匹配Keyword
+    // 因此需记录某个结构是否是终结符，只有终结符的父节点才添加命名分组
+    let isTerminal = true
+    const regExpStr = expr.replace(/<(\w+)>/g, (s, name) => {
+      // 出现替换则说明是非终结符
+      isTerminal = false
+      const result = this.compile(lexicalStruct, name)
+      if (result.isTerminal) {
+        // 使用命名分组记录类型名称
+        return `(?<${name}>` + result.source + ')'
+      } else {
+        return result.source
+      }
     })
     return {
       source: regExpStr,
-      length: offset,
+      isTerminal,
     }
   }
 
   exec(str) {
     const res = this.regExp.exec(str)
+    if (!res.groups) {
+      return
+    }
     let type
-    for (let i = 1; i < res.length; i += 1) {
-      // 一个token可能会匹配多个，匹配最内层最具体的那个（数字更大）
-      // 比如 for，既是Token也是Keyword，匹配Keyword
-      if (res[i] !== undefined) {
-        type = this.table.get(i)
+    for (const [key, value] of Object.entries(res.groups)) {
+      if (value !== undefined) {
+        type = key
       }
     }
     if (type) {
-      console.log(JSON.stringify(res[0]).padEnd(20), type)
-      res[type] = true
+      res.lexcialType = type
     }
     return res
   }
@@ -53,7 +60,7 @@ class XRegExp {
 }
 
 function scan(str) {
-  const lexical = {
+  const lexicalStruct = {
     InputElement: '<WhiteSpace>|<LineTerminator>|<Comment>|<Token>',
     WhiteSpace: / /,
     LineTerminator: /\n/,
@@ -70,9 +77,10 @@ function scan(str) {
     Identifier: /[a-zA-Z_\$][a-zA-Z0-9_\$]*/,
     Punctuator: /\(|\)|\[|\]|\{|\}|=>|==|=|<|\+|\+\+|\.|;|\?|:|\*|,/,
   }
-  const regExp = new XRegExp(lexical, 'g', 'InputElement')
+  const regExp = new XRegExp(lexicalStruct, 'g', 'InputElement')
   while (regExp.lastIndex < str.length) {
-    regExp.exec(str)
+    const res = regExp.exec(str)
+    console.log(JSON.stringify(res[0]).padEnd(20), res.lexcialType)
   }
 }
 
