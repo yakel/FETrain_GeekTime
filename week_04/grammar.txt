@@ -1,0 +1,92 @@
+/*
+Lexical Analysis(Tokenization)：词法分析
+Syntactic Analysis(Parsing): 语法分析
+Grammar: 文法，包含词法和语法
+*/ 
+
+/* Lexcial */
+InputElement :
+        WhiteSpace
+        LineTerminator
+        Comment
+        Token
+WhiteSpace :
+        ' '
+        \t         
+LineTerminator :
+        '\n'
+Comment :
+        SigleLineComment
+        MultiLineComment
+SigleLineComment :
+        // NonLineTerminator LineTerminator
+MultiLineComment :
+        /* */
+Token :
+        Literal
+        Keyword
+        Identifier
+        Punctuator
+Literal :
+        NumericLiteral
+        StringLiteral
+        BooleanLiteral
+        NullLiteral
+Keyword :
+        if for ...
+Identifier :
+        a-z 0-9 _ $
+Punctuator :
+        , ' " : ? ...
+
+
+/* Syntax */
+Program :
+        StatementList
+StatementList :
+        Statement
+        StatementList Statement
+Statement :
+        ExpressionStatement
+        IfStatement
+        ForStatement
+        WhileStatement
+        VariableDeclaration
+        FunctionDeclaration
+        ClassDeclaration
+        BreakStatement
+        ContinueStatement
+        ReturnStatement
+        TryStatement
+        CatchStatement
+        ThrowStatement
+        Block
+IfStatement :
+        if ( Expression ) Statement
+TryStatement :
+        try { StatementList } catch (Expression) { Statement }
+Block :
+        { Statement }
+ExpressionStatement :
+        Expression ;
+Expression :
+        ArithmeticExpression
+ArithmeticExpression :
+        AdditiveExpression
+AdditiveExpression :
+        MutiplicativeExpression
+        AdditiveExpression + MutiplicativeExpression 
+        AdditiveExpression - MutiplicativeExpression 
+MutiplicativeExpression :
+        UnaryExpression
+        MutiplicativeExpression * Number
+        MutiplicativeExpression / Number
+UnaryExpression:
+        PrimaryExpression
+        + PrimaryExpression
+        - PrimaryExpression
+        typeof PrimaryExpression
+PrimaryExpression:
+        ( Expression )
+        Literal
+        Identifier
