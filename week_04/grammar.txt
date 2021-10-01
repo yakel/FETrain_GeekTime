@@ -79,8 +79,8 @@ AdditiveExpression :
         AdditiveExpression - MutiplicativeExpression 
 MutiplicativeExpression :
         UnaryExpression
-        MutiplicativeExpression * Number
-        MutiplicativeExpression / Number
+        MutiplicativeExpression * UnaryExpression
+        MutiplicativeExpression / UnaryExpression
 UnaryExpression:
         PrimaryExpression
         + PrimaryExpression
