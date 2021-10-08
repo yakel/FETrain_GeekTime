@@ -79,12 +79,8 @@ function closure(state) {
   }
 }
 
-let end = {
-  $isEnd: true,
-}
-
 let start = {
-  Program: end,
+  Program: { $isEnd: true },
   // IfStatement: end,
 }
 
