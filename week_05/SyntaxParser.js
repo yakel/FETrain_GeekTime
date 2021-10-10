@@ -31,7 +31,13 @@ const syntax = {
     ['MutiplicativeExpression', '/', 'PrimaryExpression'],
   ],
   PrimaryExpression: [['(', 'Expression', ')'], ['Literal'], ['Identifier']],
-  Literal: [['Number']],
+  Literal: [
+    ['NumericLiteral'],
+    ['StringLiteral'],
+    ['BooleanLiteral'],
+    ['NullLiteral'],
+    ['RegularExpressionLiteral'],
+  ],
 }
 
 const hash = {}
@@ -132,7 +138,38 @@ function parse(source) {
 
   const res = reduce()
   console.log(res)
+  return res
+}
+
+const evaluator = {
+  Program(node) {
+    return evaluate(node.children[0])
+  },
+  StatementList(node) {
+    if (node.children.length === 1) {
+      return evaluate(node.children[0])
+    } else {
+      evaluate(node.children[0])
+      return evaluate(node.children[1])
+    }
+  },
+  Statement(node) {
+    return evaluate(node.children[0])
+  },
+  VariableDeclaration(node) {
+    console.log('declare ', node.children[1].name)
+  },
+  EOF() {
+    return null
+  },
+}
+
+function evaluate(node) {
+  if (evaluator[node.type]) {
+    return evaluator[node.type](node)
+  }
 }
 
 let source = 'var a;'
-parse(source)
+const tree = parse(source)
+evaluate(tree)
