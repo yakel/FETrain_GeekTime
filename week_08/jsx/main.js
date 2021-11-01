@@ -25,18 +25,25 @@ class Carousel extends Component {
 
       const move = (event) => {
         const offsetX = event.clientX - startX
-        for (const child of children) {
+        const current = position - (offsetX - (offsetX % 500)) / 500
+        for (let offset of [-1, 0, 1]) {
+          const pos = (current + offset + children.length) % children.length
+          const child = children[pos]
           child.style.transition = 'none'
-          child.style.transform = `translateX(${-position * 500 + offsetX}px)`
+          child.style.transform = `translateX(${
+            -pos * 500 + offset * 500 + (offsetX % 500)
+          }px)`
         }
       }
 
       const up = (event) => {
         const offsetX = event.clientX - startX
         position -= Math.floor(offsetX / 500)
-        for (const child of children) {
+        for (let offset of [0, Math.sign(Math.round(x / 500) - x)) {
+          const pos = (position + offset + children.length) % children.length
+          const child = children[pos]
           child.style.transition = ''
-          child.style.transform = `translateX(${-position * 500}px)`
+          child.style.transform = `translateX(${-pos * 500 + offset * 500}px)`
         }
         document.removeEventListener('mousemove', move)
         document.removeEventListener('mouseup', up)
