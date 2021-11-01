@@ -39,7 +39,12 @@ class Carousel extends Component {
       const up = (event) => {
         const offsetX = event.clientX - startX
         position -= Math.floor(offsetX / 500)
-        for (let offset of [0, Math.sign(Math.round(x / 500) - x)) {
+        for (let offset of [
+          0,
+          -Math.sign(
+            Math.round(offsetX / 500) - offsetX + 250 * Math.sign(offsetX)
+          ),
+        ]) {
           const pos = (position + offset + children.length) % children.length
           const child = children[pos]
           child.style.transition = ''
