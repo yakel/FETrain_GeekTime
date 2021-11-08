@@ -72,13 +72,13 @@ export class Animation {
     this.endValue = endValue
     this.duration = duration
     this.delay = delay
-    this.timingFunction = timingFunction
-    this.template = template
+    this.timingFunction = timingFunction || ((v) => v)
+    this.template = template || ((v) => v)
   }
 
   receive(time) {
     const range = this.endValue - this.startValue
-    const progress = time / this.duration
+    const progress = this.timeFunction(time / this.duration)
     this.object[this.property] = this.template(
       this.startValue + range * progress
     )
