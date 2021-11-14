@@ -1,5 +1,7 @@
 import { createElement } from './framework'
-import { Carousel } from './carousel.js'
+// import { Carousel } from './Carousel.js'
+// import { Button } from './Button.js'
+import { List } from './List.js'
 
 let images = [
   'bb/21/bb38fb7c1073eaee1755f81131f11d21.jpg',
@@ -10,13 +12,30 @@ let images = [
 images = images.map((x) => ({
   img: 'https://static001.geekbang.org/resource/image/' + x,
   url: 'https://time.geekbang.org',
+  title: 'Cat',
 }))
 
-const a = (
-  <Carousel
-    src={images}
-    onChange={(event) => console.log(event.detail.position)}
-    onClick={(event) => (location.href = event.detail.data.url)}
-  />
+// const carousel = (
+//   <Carousel
+//     src={images}
+//     onChange={(event) => console.log(event.detail.position)}
+//     onClick={(event) => (location.href = event.detail.data.url)}
+//   />
+// )
+// carousel.mountTo(document.body)
+
+// const button = <Button>Content</Button>
+// button.mountTo(document.body)
+
+const list = (
+  <List data={images}>
+    {(record) => (
+      <div>
+        <img src={record.img} />
+        <a src={record.url} />
+        {record.title}
+      </div>
+    )}
+  </List>
 )
-a.mountTo(document.body)
+list.mountTo(document.body)
