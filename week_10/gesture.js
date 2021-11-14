@@ -95,6 +95,7 @@ export class Recognizer {
 
   start(point, context) {
     // console.log('start:', point.clientX, point.clientY)
+    this.dispatcher.dispatch('start', {})
     context.startX = point.clientX
     context.startY = point.clientY
     context.isTap = true
@@ -155,16 +156,6 @@ export class Recognizer {
 
   end(point, context) {
     // console.log('end:', point.clientX, point.clientY)
-    if (context.isTap) {
-      this.dispatcher.dispatch('tap', {})
-      clearTimeout(context.handler)
-    }
-    if (context.isPan) {
-      this.dispatcher.dispatch('panend', {})
-    }
-    if (context.isPress) {
-      this.dispatcher.dispatch('pressend', {})
-    }
     context.points = context.points.filter((p) => Date.now() - p.t < 500)
     let v = 0
     if (context.points.length) {
@@ -175,6 +166,32 @@ export class Recognizer {
       v = d / (Date.now() - firstPoint.t)
     }
     context.isFlick = v > 1.5
+
+    if (context.isTap) {
+      this.dispatcher.dispatch('tap', {})
+      clearTimeout(context.handler)
+    }
+    if (context.isPan) {
+      this.dispatcher.dispatch('panend', {
+        clientX: point.clientX,
+        clientY: point.clientY,
+        startX: context.startX,
+        startY: context.startY,
+        isFlick: context.isFlick,
+        velocity: v,
+      })
+    }
+    if (context.isPress) {
+      this.dispatcher.dispatch('pressend', {})
+    }
+    this.dispatcher.dispatch('end', {
+      clientX: point.clientX,
+      clientY: point.clientY,
+      startX: context.startX,
+      startY: context.startY,
+      isFlick: context.isFlick,
+      velocity: v,
+    })
   }
 
   cancel(point, context) {
@@ -189,7 +206,7 @@ export class Dispatcher {
   }
 
   dispatch(type, properties) {
-    console.log('dispatch:', type)
+    // console.log('dispatch:', type)
     const event = new Event(type)
     for (const [key, value] of Object.entries(properties)) {
       event[key] = value
