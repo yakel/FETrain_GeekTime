@@ -1,6 +1,7 @@
 export class Listener {
   constructor(element, recognizer) {
     this.element = element
+    this.recognizer = recognizer
     this.contexts = new Map()
     this.isListeningMouse = false
 
@@ -88,7 +89,10 @@ export class Listener {
 }
 
 export class Recognizer {
-  constructor() {}
+  constructor(dispatcher) {
+    this.dispatcher = dispatcher
+  }
+
   start(point, context) {
     // console.log('start:', point.clientX, point.clientY)
     context.startX = point.clientX
@@ -138,7 +142,7 @@ export class Recognizer {
   }
 
   end(point, context) {
-    console.log('end:', point.clientX, point.clientY)
+    // console.log('end:', point.clientX, point.clientY)
     if (context.isTap) {
       this.dispatcher.dispatch('tap', {})
       clearTimeout(context.handler)
@@ -149,7 +153,7 @@ export class Recognizer {
     if (context.isPress) {
       this.dispatcher.dispatch('pressend', {})
     }
-    context.points = context.points.filter((p) => now - p.t < 500)
+    context.points = context.points.filter((p) => Date.now() - p.t < 500)
     let v = 0
     if (context.points.length) {
       const firstPoint = context.points[0]
@@ -173,6 +177,7 @@ export class Dispatcher {
   }
 
   dispatch(type, properties) {
+    console.log('dispatch:', type)
     const event = new Event(type)
     for (const [key, value] of Object.entries(properties)) {
       event[key] = value
